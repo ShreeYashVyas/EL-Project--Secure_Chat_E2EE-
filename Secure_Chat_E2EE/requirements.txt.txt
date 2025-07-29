@@ -1,4 +1,0 @@
-Flask
-python-socketio
-eventlet
-cryptography
