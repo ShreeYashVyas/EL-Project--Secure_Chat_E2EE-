@@ -1,0 +1,38 @@
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import serialization, hashes
+
+def load_or_generate_keys(username):
+    try:
+        with open(f'{username}_priv.pem', 'rb') as f:
+            priv = serialization.load_pem_private_key(f.read(), password=None)
+        with open(f'{username}_pub.pem', 'rb') as f:
+            pub = serialization.load_pem_public_key(f.read())
+    except FileNotFoundError:
+        priv = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        pub = priv.public_key()
+        with open(f'{username}_priv.pem', 'wb') as f:
+            f.write(priv.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption()))
+        with open(f'{username}_pub.pem', 'wb') as f:
+            f.write(pub.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo))
+    return priv, pub
+
+def encrypt_msg(msg, peer_pub_pem):
+    from cryptography.hazmat.primitives.serialization import load_pem_public_key
+    pub = load_pem_public_key(peer_pub_pem.encode())
+    cipher = pub.encrypt(msg.encode(), padding.OAEP(
+        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+        algorithm=hashes.SHA256(),
+        label=None))
+    return cipher.hex()
+
+def decrypt_msg(cipher_hex, priv):
+    cipher = bytes.fromhex(cipher_hex)
+    return priv.decrypt(cipher, padding.OAEP(
+        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+        algorithm=hashes.SHA256(),
+        label=None)).decode()

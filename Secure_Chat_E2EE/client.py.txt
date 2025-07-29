@@ -1,0 +1,27 @@
+import socketio
+from crypto_utils import load_or_generate_keys, encrypt_msg, decrypt_msg
+
+sio = socketio.Client()
+username = input("Your username: ")
+peer = input("Peer username: ")
+
+priv, pub = load_or_generate_keys(username)
+peer_pub = input("Paste peer's public key: ")
+
+def send_loop():
+    while True:
+        msg = input("> ")
+        enc = encrypt_msg(msg, peer_pub)
+        sio.emit('message', {'to': peer, 'from': username, 'cipher': enc})
+
+@sio.on('message')
+def on_message(data):
+    dec = decrypt_msg(data['cipher'], priv)
+    print(f"\n{data['from']} (E2EE): {dec}")
+
+@sio.event
+def connect():
+    sio.emit('register', {'username': username})
+    send_loop()
+
+sio.connect("http://localhost:5000")
