@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure E2EE Chat</title>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="/static/chat.js"></script>
+    <style>
+        body { font-family: Arial; margin: 0; padding: 0; }
+        #chat { width: 400px; margin: 40px auto; border: 1px solid #ccc; padding: 20px; }
+        #messages { height: 200px; overflow-y: scroll; border: 1px solid #eee; margin-bottom: 10px; padding: 5px; }
+        #username { width: 60%; }
+        #message { width: 70%; }
+    </style>
+</head>
+<body>
+<div id="chat">
+    <h2>Secure E2EE Chat</h2>
+    <div>
+        <input id="username" placeholder="Enter username" />
+        <button onclick="registerUser()">Join</button>
+    </div>
+    <div>
+        <label for="recipient">Send to:</label>
+        <select id="recipient"></select>
+    </div>
+    <div id="messages"></div>
+    <input id="message" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+</div>
+</body>
+</html>
